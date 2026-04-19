@@ -16,7 +16,12 @@
   --tile-peer: #092c49;      /* row/col/box highlight (dark navy) */
   --tile-match: #a8bcd5;     /* same-number highlight (light blue — priority) */
   --titlebar-h: 28px;
-  --cell: 38px;
+  /* Cells scale fluidly with the viewport so the board fills the available
+   * space in a resizable Tauri window (and a mobile browser viewport).
+   * The chrome budget (`40` across, `240` down) reserves room for app
+   * padding + top-bar + pad + tools + status + gaps. Clamped so cells never
+   * get unusably small or absurdly huge. */
+  --cell: clamp(30px, min(calc((100vw - 40px) / 9), calc((100vh - 240px) / 9)), 60px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -65,8 +70,6 @@ body.web #app { border: 1px solid var(--border); border-radius: 10px; box-shadow
 }
 
 @media (max-width: 440px) {
-  /* 9 cells + 4 px board border = 9c + 4 ≤ viewport-16 (app padding). */
-  :root { --cell: calc((100vw - 36px) / 9); }
   body.web { padding: 8px 4px; }
   body.web #app { padding: 10px 8px 12px; border-radius: 8px; }
   body.web { align-items: stretch; }
@@ -104,9 +107,7 @@ body.web #app { border: 1px solid var(--border); border-radius: 10px; box-shadow
 }
 
 @media (max-width: 340px) {
-  /* Really narrow (iPhone SE 1st gen @ 320 px): drop the language grid to 2
-   * columns already done above; also let the pad go slightly denser. */
-  :root { --cell: calc((100vw - 28px) / 9); }
+  /* Really narrow (iPhone SE 1st gen @ 320 px): tighten outer padding. */
   body.web #app { padding: 8px 6px 10px; }
 }
 
@@ -209,7 +210,8 @@ button.primary:disabled { opacity: 0.4; cursor: default; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  /* Digit size scales with the cell — the classic "half the cell" ratio. */
+  font-size: calc(var(--cell) * 0.5);
   font-weight: 500;
   cursor: pointer;
   color: var(--user);
@@ -235,7 +237,9 @@ button.primary:disabled { opacity: 0.4; cursor: default; }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  font-size: 9px;
+  /* Pencil marks are roughly a quarter of the cell — readable without
+   * crowding the 3×3 mini-grid even as cells grow. */
+  font-size: calc(var(--cell) * 0.24);
   font-weight: 500;
   line-height: 1;
   color: var(--text-muted);
