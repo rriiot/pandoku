@@ -45,7 +45,7 @@ jobs:
           set -euo pipefail
           src="src-tauri/target/release/pandoku.exe"
           tag="${GITHUB_REF_NAME:-${{ github.event.inputs.tag }}}"
-          out="pandoku-${tag}-windows-x64.exe"
+          out="pandoku-win.exe"
           cp "$src" "$out"
           ls -la "$out"
           echo "ARTIFACT=$out" >> "$GITHUB_ENV"

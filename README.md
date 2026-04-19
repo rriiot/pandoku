@@ -7,7 +7,7 @@ Pandoku is a small window that sits on your desktop and does one thing well: gen
 ## Play
 
 - **Play in your browser** → https://rriiot.github.io/pandoku/
-- **Windows desktop** → grab the latest `pandoku-vX.Y.Z-windows-x64.exe` from the [Releases](https://github.com/rriiot/pandoku/releases) page. It's a single portable executable — no installer.
+- **Windows desktop** → grab `pandoku-win.exe` from the [latest release](https://github.com/rriiot/pandoku/releases/latest). It's a single portable executable — no installer.
 
 ## What you get
 

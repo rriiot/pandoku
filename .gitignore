@@ -40,4 +40,5 @@ src-tauri/target/release/bundle/
 
 # Staged release binaries (attached to GitHub Releases, never committed)
 pandoku-v*.exe
+pandoku-win.exe
 
