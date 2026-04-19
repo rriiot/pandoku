@@ -2,10 +2,10 @@
 // logic lives here; everything else is in ./ui, ./gen, ./solver, ./board, etc.
 
 import { LogicalSize } from "@tauri-apps/api/window";
+import { IS_TAURI } from "./env";
 import { appWindow, boardEl, diffSelect, newBtn } from "./ui/dom";
 import { buildGrid, buildPad, render } from "./ui/render";
-import { inputNumber, selectCell, togglePencil } from "./ui/state";
-import { revertLast } from "./ui/state";
+import { inputNumber, revertLast, selectCell, togglePencil, toggleNumberHighlight } from "./ui/state";
 import { isPencilInput, bindPencilMode } from "./ui/pencilMode";
 import { bindLoadingHandlers } from "./ui/loadingOverlay";
 import { bindHelpHandlers } from "./ui/helpOverlay";
@@ -16,12 +16,17 @@ import { startCustomPuzzle, startNewPuzzle } from "./ui/puzzleFlow";
 import { onLocaleChange } from "./i18n";
 import { applyI18n } from "./i18n/dom";
 
-/* Titlebar controls */
-document.getElementById("minimize-btn")?.addEventListener("click", () => appWindow.minimize());
-document.getElementById("close-btn")?.addEventListener("click", () => appWindow.close());
-document.getElementById("titlebar")?.addEventListener("dblclick", (e) => {
-  if ((e.target as Element).closest("button")) return;
-});
+/* Titlebar controls — desktop-only. In the web build we mark the body so CSS
+   hides the custom titlebar (browser chrome handles min/close). */
+if (IS_TAURI) {
+  document.getElementById("minimize-btn")?.addEventListener("click", () => appWindow.minimize());
+  document.getElementById("close-btn")?.addEventListener("click", () => appWindow.close());
+  document.getElementById("titlebar")?.addEventListener("dblclick", (e) => {
+    if ((e.target as Element).closest("button")) return;
+  });
+} else {
+  document.body.classList.add("web");
+}
 
 /* Grid + pad construction */
 buildGrid(selectCell);
@@ -29,9 +34,7 @@ buildPad({
   onNumber: (n, e) => {
     const btn = (e.currentTarget ?? e.target) as HTMLButtonElement;
     if (btn.classList.contains("filled")) {
-      import("./ui/state")
-        .then(({ toggleNumberHighlight }) => toggleNumberHighlight(n))
-        .catch((err) => console.error("Failed to load state module:", err));
+      toggleNumberHighlight(n);
       return;
     }
     if (isPencilInput(e)) togglePencil(n);
@@ -50,8 +53,9 @@ bindKeyboard();
 
 newBtn.addEventListener("click", () => { void startNewPuzzle(); });
 
-/* Fit window to content after initial layout. */
+/* Fit the Tauri window to the content after initial layout. No-op on web. */
 async function fitWindowToContent() {
+  if (!IS_TAURI) return;
   await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
   const titlebar = document.getElementById("titlebar") as HTMLElement;
   const app = document.getElementById("app") as HTMLElement;

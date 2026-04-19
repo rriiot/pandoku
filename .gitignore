@@ -38,3 +38,6 @@ src-tauri/target/release/bundle/
 .claude/
 1.md
 
+# Staged release binaries (attached to GitHub Releases, never committed)
+pandoku-v*.exe
+

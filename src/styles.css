@@ -31,6 +31,11 @@ html, body {
   user-select: none;
 }
 
+/* Web (GitHub Pages) build — centered card, no custom titlebar, normal scroll. */
+body.web { overflow: auto; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 24px 12px; }
+body.web #titlebar { display: none; }
+body.web #app { border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); background: var(--bg); }
+
 /* Titlebar */
 #titlebar {
   display: flex;
