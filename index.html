@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>pandoku</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+  <body>
+    <div id="titlebar" data-tauri-drag-region>
+      <span class="title" data-tauri-drag-region>pandoku</span>
+      <div class="titlebar-buttons">
+        <button id="minimize-btn" title="Minimize">&#x2013;</button>
+        <button id="close-btn" title="Close">&#x2715;</button>
+      </div>
+    </div>
+    <main id="app">
+      <header class="top-bar">
+        <button id="advanced-btn" class="advanced-btn"
+                data-i18n="buttons.advanced" data-i18n-title="top.advancedTitle">Adv</button>
+        <select id="difficulty-select" aria-label="Difficulty">
+          <option value="Easy" data-i18n="difficulty.Easy">Easy</option>
+          <option value="Medium" selected data-i18n="difficulty.Medium">Medium</option>
+          <option value="Hard" data-i18n="difficulty.Hard">Hard</option>
+          <option value="Expert" data-i18n="difficulty.Expert">Expert</option>
+          <option value="Extreme" data-i18n="difficulty.Extreme">Extreme</option>
+          <option value="Extreme - Gen" data-i18n="difficulty.Extreme - Gen">Extreme - Gen</option>
+          <option value="Extreme - Pool" data-i18n="difficulty.Extreme - Pool">Extreme - Pool</option>
+        </select>
+        <button id="new-btn" class="primary" data-i18n="buttons.new" data-i18n-title="top.newHint">New</button>
+      </header>
+
+      <div id="board" class="board" role="grid" aria-label="Sudoku board"></div>
+
+      <div id="pad" class="pad" aria-label="Number pad"></div>
+
+      <div id="tools" class="tools">
+        <button id="pencil-btn" class="pencil-btn" data-i18n-title="top.pencilHint">
+          <span class="icon" aria-hidden="true">✎</span>
+          <span data-i18n="buttons.pencil">Pencil</span>
+        </button>
+        <button id="history-btn" class="history-btn"
+                data-i18n="buttons.history" data-i18n-title="top.historyHint">History</button>
+        <button id="help-btn" class="help-btn"
+                data-i18n="buttons.help" data-i18n-title="top.helpHint">?</button>
+      </div>
+
+      <footer class="status">
+        <span id="status-text" data-i18n="status.loading">Loading…</span>
+        <span id="timer">0:00</span>
+        <span id="metric"></span>
+      </footer>
+    </main>
+
+    <div id="loading-overlay" class="loading-overlay hidden" aria-hidden="true">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="loading-text" data-i18n="loading.title">Generating puzzle…</div>
+      <div class="loading-info">
+        <div class="lo-row"><span class="lo-label" data-i18n="loading.stage">Stage</span><span id="lo-stage">—</span></div>
+        <div class="lo-row"><span class="lo-label" data-i18n="loading.attempt">Attempt</span><span id="lo-attempt">—</span></div>
+        <div class="lo-row"><span class="lo-label" data-i18n="loading.clues">Clues</span><span id="lo-clues">—</span></div>
+        <div class="lo-row" id="lo-best-row" hidden><span class="lo-label" data-i18n="loading.bestSoFar">Best so far</span><span id="lo-best">—</span></div>
+      </div>
+      <div class="gen-buttons">
+        <button id="use-best-btn" class="gen-btn secondary"
+                data-i18n="buttons.useBest" data-i18n-title="top.useBestHint">Use best</button>
+        <button id="stop-gen-btn" class="gen-btn danger"
+                data-i18n="buttons.kill" data-i18n-title="top.killHint">Kill</button>
+      </div>
+    </div>
+
+    <div id="advanced-overlay" class="overlay hidden" aria-hidden="true">
+      <div class="panel" role="dialog" aria-label="Advanced — pick techniques">
+        <header>
+          <span data-i18n="advanced.title">Advanced — pick techniques</span>
+          <button id="advanced-close" aria-label="Close">✕</button>
+        </header>
+        <div class="advanced-intro" data-i18n="advanced.intro">
+          Tick techniques the puzzle should require. Picking a stronger technique disables those it subsumes. Items marked (not implemented) are shown for completeness but can't be enforced yet.
+        </div>
+        <div id="advanced-list" class="advanced-list"></div>
+        <footer class="advanced-footer">
+          <button id="advanced-cancel" data-i18n="buttons.cancel">Cancel</button>
+          <button id="advanced-generate" class="primary" data-i18n="buttons.generate">Generate</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="help-overlay" class="overlay hidden" aria-hidden="true">
+      <div class="panel" role="dialog" aria-label="Help">
+        <header>
+          <span data-i18n="help.title">Help</span>
+          <button id="help-close" aria-label="Close">✕</button>
+        </header>
+        <div class="help-body">
+          <h3 data-i18n="help.language">Language</h3>
+          <div id="language-grid" class="language-grid"></div>
+
+          <h3 data-i18n="help.howToPlay">How to play</h3>
+          <p data-i18n="help.howToPlayBody">Fill every row, every column, and every 3×3 box with the digits 1–9, each appearing exactly once.</p>
+
+          <h3 data-i18n="help.controls">Controls</h3>
+          <ul>
+            <li data-i18n="help.c1">Click a cell to select it, or use arrow keys to move the selection.</li>
+            <li data-i18n="help.c2">Type 1–9 to place a number in the selected cell.</li>
+            <li data-i18n="help.c3">0 / Backspace / Delete: clear the cell (clears pencil marks if the cell is already empty).</li>
+            <li data-i18n="help.c4">Ctrl+Z or the ↶ button: revert the last action.</li>
+          </ul>
+
+          <h3 data-i18n="help.pencil">Pencil marks</h3>
+          <p data-i18n="help.pencilBody">Click Pencil to toggle pencil mode, or hold Shift / Ctrl / Alt while entering a digit.</p>
+
+          <h3 data-i18n="help.done">Number-done indicator</h3>
+          <p data-i18n="help.doneBody">When all 9 instances of a digit are placed, its pad button shows ✓ and can no longer be used as input.</p>
+
+          <h3 data-i18n="help.hotkeys">Hotkeys</h3>
+          <ul>
+            <li data-i18n="help.h1">1–9 — place digit in selected cell</li>
+            <li data-i18n="help.h2">Shift/Ctrl/Alt + 1–9 — toggle pencil mark</li>
+            <li data-i18n="help.h3">0 / Backspace / Delete — clear cell or pencil marks</li>
+            <li data-i18n="help.h4">Ctrl+Z — undo</li>
+            <li data-i18n="help.h5">Arrow keys — move selection</li>
+            <li data-i18n="help.h6">p — pause / resume the timer</li>
+            <li data-i18n="help.h7">ssssss — press s six times in a row to reveal the solution (debug)</li>
+            <li data-i18n="help.h8">Esc — close any floating window</li>
+          </ul>
+
+          <h3 data-i18n="help.variants">Difficulty variants</h3>
+          <ul>
+            <li data-i18n="help.v1">Easy → Expert: standard carving-based generation targeting a clue count for each level.</li>
+            <li data-i18n="help.v2">Extreme: try to produce a real 17-clue puzzle for up to 42 seconds. If the budget runs out without hitting 17, one is picked from a bundled verified 17-clue pool.</li>
+            <li data-i18n="help.v3">Extreme - Gen: keep carving indefinitely until the generator reaches a 17-clue puzzle.</li>
+            <li data-i18n="help.v4">Extreme - Pool: skip generation and pick a puzzle straight from the bundled 17-clue catalog.</li>
+          </ul>
+
+          <h3 data-i18n="help.metric">Difficulty metric</h3>
+          <p data-i18n="help.metricBody">The number after each puzzle ("N backtracks") comes from running a deterministic brute-force solver and counting how many times it had to backtrack. More backtracks = harder puzzle.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="history-overlay" class="overlay hidden" aria-hidden="true">
+      <div class="panel" role="dialog" aria-label="History">
+        <header>
+          <span data-i18n="history.title">History</span>
+          <button id="history-close" aria-label="Close">✕</button>
+        </header>
+        <section class="best-times">
+          <div class="section-title" data-i18n="history.bestTimes">Best times</div>
+          <div id="best-times-list"></div>
+        </section>
+        <section class="history-list-wrap">
+          <div class="section-title" data-i18n="history.allGames">All games</div>
+          <div id="history-list" class="history-list"></div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
