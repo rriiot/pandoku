@@ -32,9 +32,72 @@ html, body {
 }
 
 /* Web (GitHub Pages) build — centered card, no custom titlebar, normal scroll. */
-body.web { overflow: auto; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 24px 12px; }
+body.web { overflow: auto; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 24px 12px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 body.web #titlebar { display: none; }
 body.web #app { border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); background: var(--bg); }
+
+/* ------ Mobile / narrow viewport tuning (web build only) ------
+ * - Cell size shrinks to fit the viewport while staying an integer-ish pixel
+ *   count so the board stays crisp.
+ * - Touch targets on the pad & tool buttons bump to ~40 px tall.
+ * - All floating panels clamp to `min(360px, 94vw)` so they never overflow.
+ * - `touch-action: manipulation` suppresses the double-tap zoom gesture on
+ *   anything tappable, matching native-app expectations.
+ */
+.cell, .pad button, .pencil-btn, .history-btn, .help-btn,
+.advanced-btn, .top-bar button, .top-bar select,
+.advanced-footer button, .loading-overlay .gen-btn,
+.language-grid .lang-btn, .titlebar-buttons button,
+.overlay .panel header button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 440px) {
+  /* 9 cells + 4 px board border = 9c + 4 ≤ viewport-16 (app padding). */
+  :root { --cell: calc((100vw - 36px) / 9); }
+  body.web { padding: 8px 4px; }
+  body.web #app { padding: 10px 8px 12px; border-radius: 8px; }
+  body.web { align-items: stretch; }
+
+  .top-bar { gap: 6px; }
+  .top-bar select, .advanced-btn, .top-bar button.primary {
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .pad { gap: 3px; }
+  .pad button { height: 40px; font-size: 17px; }
+  .pad button.revert { font-size: 18px; }
+
+  .tools { gap: 3px; }
+  .pencil-btn { height: 38px; font-size: 14px; }
+  .history-btn { height: 38px; font-size: 14px; }
+  .help-btn { height: 38px; width: 38px; font-size: 15px; }
+
+  .status { font-size: 13px; }
+
+  /* Floating panels never wider than the screen. */
+  .overlay .panel { width: min(360px, 94vw); max-height: 86vh; }
+  .loading-overlay .loading-info { width: 90%; }
+  .loading-overlay .loading-text { font-size: 13px; }
+
+  .help-body { padding: 10px 12px 16px; font-size: 13px; }
+  .help-body h3 { margin-top: 14px; }
+
+  .advanced-intro { font-size: 12px; }
+  .adv-group .adv-items { grid-template-columns: 1fr; gap: 1px 0; }
+  .advanced-footer button { padding: 8px 16px; font-size: 14px; }
+
+  .language-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 340px) {
+  /* Really narrow (iPhone SE 1st gen @ 320 px): drop the language grid to 2
+   * columns already done above; also let the pad go slightly denser. */
+  :root { --cell: calc((100vw - 28px) / 9); }
+  body.web #app { padding: 8px 6px 10px; }
+}
 
 /* Titlebar */
 #titlebar {
