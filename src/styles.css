@@ -31,6 +31,17 @@ html, body {
   user-select: none;
 }
 
+/* Tauri window is resizable; body uses flex-column so the titlebar stretches
+ * full width and #app stays centered horizontally when the window is wider
+ * than the content. Vertical layout stays stacked (titlebar → content). */
+body {
+  display: flex;
+  flex-direction: column;
+}
+#app { align-self: center; }
+/* If the window is shrunk below the content, allow scroll instead of clip. */
+body:not(.web) { overflow-y: auto; }
+
 /* Web (GitHub Pages) build — centered card, no custom titlebar, normal scroll. */
 body.web { overflow: auto; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 24px 12px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 body.web #titlebar { display: none; }
