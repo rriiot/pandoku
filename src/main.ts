@@ -18,9 +18,10 @@ import { applyI18n } from "./i18n/dom";
 
 /* Titlebar controls — desktop-only. In the web build we mark the body so CSS
    hides the custom titlebar (browser chrome handles min/close). */
-if (IS_TAURI) {
-  document.getElementById("minimize-btn")?.addEventListener("click", () => appWindow.minimize());
-  document.getElementById("close-btn")?.addEventListener("click", () => appWindow.close());
+if (IS_TAURI && appWindow) {
+  const win = appWindow;
+  document.getElementById("minimize-btn")?.addEventListener("click", () => win.minimize());
+  document.getElementById("close-btn")?.addEventListener("click", () => win.close());
   document.getElementById("titlebar")?.addEventListener("dblclick", (e) => {
     if ((e.target as Element).closest("button")) return;
   });
@@ -55,7 +56,7 @@ newBtn.addEventListener("click", () => { void startNewPuzzle(); });
 
 /* Fit the Tauri window to the content after initial layout. No-op on web. */
 async function fitWindowToContent() {
-  if (!IS_TAURI) return;
+  if (!IS_TAURI || !appWindow) return;
   await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
   const titlebar = document.getElementById("titlebar") as HTMLElement;
   const app = document.getElementById("app") as HTMLElement;

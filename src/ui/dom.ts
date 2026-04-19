@@ -1,8 +1,13 @@
 // Centralized DOM references so every module queries once at module-load time.
 
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow, type Window as TauriWindow } from "@tauri-apps/api/window";
+import { IS_TAURI } from "../env";
 
-export const appWindow = getCurrentWindow();
+// `getCurrentWindow()` reads `window.__TAURI_INTERNALS__` which is absent in a
+// plain browser — eager evaluation there throws and aborts the whole module
+// load. In the web build we leave this null; every call site is already
+// behind an `if (IS_TAURI)` guard.
+export const appWindow: TauriWindow | null = IS_TAURI ? getCurrentWindow() : null;
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
